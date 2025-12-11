@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="fw-semibold mb-2">Sign in</h2>
+                <p class="text-secondary mb-4">Behavioural verification required. Type your password as usual.</p>
+                {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                {% endif %}
+                <form method="post" action="/login" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false">
+                        <div class="invalid-feedback">Please enter your username.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+                        <div class="invalid-feedback">Password is required.</div>
+                    </div>
+                    <input type="hidden" id="behaviour_data" name="behaviour_data">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/behaviour.js"></script>
+<style>
+    .floating-metrics {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        width: 320px;
+        max-width: calc(100% - 2rem);
+        z-index: 1100;
+    }
+    @media (max-width: 768px) {
+        .floating-metrics {
+            position: static;
+            width: 100%;
+            margin-top: 1rem;
+        }
+    }
+</style>
+<div class="floating-metrics">
+    <div class="card shadow-sm">
+        <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge text-bg-primary">Live</span>
+                    <span class="small mb-0">Keystroke capture is active.</span>
+                </div>
+                <button id="metricsToggle" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" type="button" data-bs-toggle="collapse" data-bs-target="#metricsCollapse" aria-expanded="false" aria-controls="metricsCollapse" aria-label="Toggle metrics">
+                    <span id="metricsIcon" aria-hidden="true">&#9650;</span>
+                </button>
+            </div>
+            <div class="collapse" id="metricsCollapse">
+                <div class="row g-2 text-center" id="keystroke-stats">
+                    <div class="col-6">
+                        <div class="p-2 border rounded-3 bg-light">
+                            <p class="text-secondary mb-0 small">Keys</p>
+                            <div class="fw-semibold" id="stat-keys">0</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 border rounded-3 bg-light">
+                            <p class="text-secondary mb-0 small">Errors</p>
+                            <div class="fw-semibold" id="stat-errors">0</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 border rounded-3 bg-light">
+                            <p class="text-secondary mb-0 small">Duration</p>
+                            <div class="fw-semibold" id="stat-duration">0 ms</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 border rounded-3 bg-light">
+                            <p class="text-secondary mb-0 small">Speed</p>
+                            <div class="fw-semibold" id="stat-speed">0 k/s</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-secondary small mb-2">Rhythm preview</p>
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small text-secondary">
+                            <span>Speed consistency</span><span id="bar-speed-label">0%</span>
+                        </div>
+                        <div class="progress" role="progressbar" aria-label="Speed consistency">
+                            <div class="progress-bar bg-success" id="bar-speed" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between small text-secondary">
+                            <span>Session duration</span><span id="bar-duration-label">0%</span>
+                        </div>
+                        <div class="progress" role="progressbar" aria-label="Duration">
+                            <div class="progress-bar bg-primary" id="bar-duration" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <ul class="small text-secondary mb-0 ps-3">
+                        <li>Match the enrolled length (avoid extra/missing keys).</li>
+                        <li>Keep your speed and pauses similar to registration.</li>
+                        <li>Minimize backspaces; corrections add penalty.</li>
+                    </ul>
+                    {% if error_details %}
+                        <div class="mt-3 p-3 border rounded-3 bg-light">
+                            <p class="text-secondary small mb-2">Why it didn’t match</p>
+                            <ul class="mb-0 small text-danger">
+                                {% for detail in error_details %}
+                                    <li>{{ detail }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(() => {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+
+// Sync collapse icon state (default collapsed: up arrow; expanded: down arrow)
+document.addEventListener('DOMContentLoaded', () => {
+    const collapseEl = document.getElementById('metricsCollapse');
+    const toggleBtn = document.getElementById('metricsToggle');
+    const icon = document.getElementById('metricsIcon');
+    if (!collapseEl || !toggleBtn || !icon) return;
+
+    const setState = (expanded) => {
+        icon.textContent = expanded ? '▼' : '▲';
+        toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    };
+    collapseEl.addEventListener('show.bs.collapse', () => setState(true));
+    collapseEl.addEventListener('hide.bs.collapse', () => setState(false));
+    setState(false);
+});
+</script>
+{% endblock %}

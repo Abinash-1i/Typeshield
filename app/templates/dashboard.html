@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card border-0" style="background: radial-gradient(circle at 20% 20%, rgba(32,201,151,.12), transparent 35%), radial-gradient(circle at 80% 0%, rgba(102,16,242,.12), transparent 40%), linear-gradient(135deg, #0d6efd, #0b2042); box-shadow: 0 18px 40px rgba(13,110,253,.15);">
+            <div class="card-body p-3 p-md-4 text-white position-relative overflow-hidden">
+                <div class="position-absolute top-0 end-0 opacity-25" style="pointer-events: none; width: 160px; height: 160px; background: radial-gradient(circle, rgba(255,255,255,.2), transparent 70%);"></div>
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                    <div class="small">
+                        <p class="text-white-50 mb-1">Authenticated session</p>
+                        <h4 class="fw-semibold mb-2">Welcome, {{ user.username }}</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge text-bg-success px-3 py-2">Keystroke Verified</span>
+                            <small class="text-white-50">Behavioural biometrics</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-center">
+                            <p class="text-white-50 mb-1">Current score</p>
+                            <div class="h3 fw-bold mb-0">{{ score }}%</div>
+                        </div>
+                        <a class="btn btn-outline-light btn-sm" href="/logout">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12 col-lg-5 col-xl-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-semibold mb-0 small">Live Attempts Pulse</h6>
+                    <span class="badge text-bg-primary">Live</span>
+                </div>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div>
+                        <p class="text-secondary mb-1 small">Success</p>
+                        <h6 class="text-success mb-0">{{ attempt_totals.success }}</h6>
+                    </div>
+                    <div>
+                        <p class="text-secondary mb-1 small">Failure</p>
+                        <h6 class="text-danger mb-0">{{ attempt_totals.failure }}</h6>
+                    </div>
+                </div>
+                <div class="mt-2" style="height: 160px; width: 100%;">
+                    <canvas id="donutChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-7 col-xl-8">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-semibold mb-0 small">Recent Attempts (History)</h6>
+                    <span class="text-secondary small">last {{ attempts_log|length }} events</span>
+                </div>
+                <div style="height: 180px; width: 100%;">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12 col-lg-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-semibold mb-0 small">Score Distribution</h6>
+                    <span class="text-secondary small">recent attempts</span>
+                </div>
+                <div style="height: 180px; width: 100%;">
+                    <canvas id="histChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-semibold mb-0 small">Attempts by Hour (UTC)</h6>
+                    <span class="text-secondary small">success vs failure</span>
+                </div>
+                <div style="height: 180px; width: 100%;">
+                    <canvas id="hourChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<p class="mt-4 mb-0 text-secondary text-center">
+    TypeShield continuously blends password security with keystroke dynamics. Re-login anytime to refresh your behavioural signature.
+</p>
+<canvas id="fireworks" style="position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1050;"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function fireworkBurst() {
+    const canvas = document.getElementById('fireworks');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    const particles = [];
+    const colors = ['#0d6efd', '#20c997', '#6610f2', '#f39c12', '#e74c3c'];
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function spawn(x, y) {
+        const count = 40;
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 4 + 2;
+            particles.push({
+                x, y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 80,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+    }
+
+    function update() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.05;
+            p.life -= 1;
+            if (p.life <= 0) {
+                particles.splice(i, 1);
+                continue;
+            }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+        }
+        if (particles.length > 0) {
+            requestAnimationFrame(update);
+        } else {
+            canvas.remove();
+            window.removeEventListener('resize', resize);
+        }
+    }
+
+    // fire three bursts
+    const positions = [
+        [width * 0.3, height * 0.4],
+        [width * 0.7, height * 0.3],
+        [width * 0.5, height * 0.5]
+    ];
+    positions.forEach((pos, idx) => setTimeout(() => {
+        spawn(...pos);
+        if (idx === positions.length - 1) update();
+    }, idx * 300));
+})();
+
+(function renderCharts() {
+    const totals = {{ attempt_totals|tojson }};
+    const attempts = {{ attempts_log|tojson }};
+
+    const donutCtx = document.getElementById('donutChart');
+    if (donutCtx) {
+        const totalCount = (totals.success || 0) + (totals.failure || 0);
+        const dataValues = totalCount === 0 ? [1, 0] : [totals.success || 0, totals.failure || 0];
+        new Chart(donutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Success', 'Failure'],
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: ['#20c997', '#dc3545']
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { enabled: totalCount > 0 }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+
+    const lineCtx = document.getElementById('lineChart');
+    if (lineCtx) {
+        const labels = attempts.map(a => new Date(a.timestamp).toLocaleTimeString());
+        const scores = attempts.map(a => a.score ?? null);
+        const colors = attempts.map(a => a.status === 'success' ? '#20c997' : '#dc3545');
+
+        new Chart(lineCtx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Score',
+                    data: scores.map(v => v ?? 0),
+                    backgroundColor: colors,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const status = attempts[ctx.dataIndex]?.status || '';
+                                const score = attempts[ctx.dataIndex]?.score ?? 'N/A';
+                                return `${status}: ${score}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { stepSize: 20 }
+                    }
+                }
+            }
+        });
+    }
+
+    // Histogram of scores
+    const histCtx = document.getElementById('histChart');
+    if (histCtx) {
+        const bins = [0, 20, 40, 60, 80, 100];
+        const counts = Array(bins.length - 1).fill(0);
+        attempts.forEach(a => {
+            if (typeof a.score !== 'number') return;
+            for (let i = 0; i < bins.length - 1; i++) {
+                if (a.score >= bins[i] && a.score <= bins[i + 1]) {
+                    counts[i] += 1;
+                    break;
+                }
+            }
+        });
+        new Chart(histCtx, {
+            type: 'bar',
+            data: {
+                labels: ['0-20', '20-40', '40-60', '60-80', '80-100'],
+                datasets: [{
+                    label: 'Attempts',
+                    data: counts,
+                    backgroundColor: '#0d6efd',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+
+    // Attempts by hour (UTC)
+    const hourCtx = document.getElementById('hourChart');
+    if (hourCtx) {
+        const success = Array(24).fill(0);
+        const failure = Array(24).fill(0);
+        attempts.forEach(a => {
+            const hour = new Date(a.timestamp).getUTCHours();
+            if (a.status === 'success') success[hour] += 1;
+            else failure[hour] += 1;
+        });
+        new Chart(hourCtx, {
+            type: 'bar',
+            data: {
+                labels: Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')),
+                datasets: [
+                    { label: 'Success', data: success, backgroundColor: '#20c997', borderRadius: 3 },
+                    { label: 'Failure', data: failure, backgroundColor: '#dc3545', borderRadius: 3 }
+                ]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } },
+                scales: { x: { stacked: true }, y: { beginAtZero: true, stacked: true } }
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}
