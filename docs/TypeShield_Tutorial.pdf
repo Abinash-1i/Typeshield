@@ -1,0 +1,334 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Length 3931 >>
+stream
+BT /F2 20 Tf 1 0 0 1 50 792 Tm (TypeShield Authenticator Tutorial) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 762 Tm (This beginner-friendly guide explains how the project works, step by step. It) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 747 Tm (also explains each file and the important code sections so you can follow the) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 732 Tm (flow without prior security or biometrics knowledge.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 713 Tm (1\) What This Project Does) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 689 Tm (TypeShield Authenticator combines a normal password with keystroke dynamics. That) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 674 Tm (means it measures how you type \(timing and rhythm\) in addition to what you type.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 655 Tm (- During registration, the app stores your password hash and a typing template.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 640 Tm (- During login, it checks the password and compares your typing pattern.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 625 Tm (- If the timing is too different, login is rejected even if the password is) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 610 Tm (  correct.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 591 Tm (2\) Quick Start \(Beginner Setup\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 567 Tm (Run these steps from the project folder:) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 548 Tm (Snippet 1: Local setup commands \(requirements.txt\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 532 Tm ($ python3 -m venv .venv) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 519 Tm ($ source .venv/bin/activate) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 506 Tm ($ pip install -r requirements.txt) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 493 Tm ($ createdb keyrythm) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 480 Tm ($ uvicorn app.main:app --reload) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 461 Tm (Open a browser and visit http://127.0.0.1:8000. Register first, then login.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 442 Tm (3\) Project Structure) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 418 Tm (Important files in this project:) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 399 Tm (- app/main.py: FastAPI entry point and web routes.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 384 Tm (- app/config.py: Environment settings \(database URL, secret key, threshold\).) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 369 Tm (- app/database.py: SQLModel engine and session helper.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 354 Tm (- app/models.py: Database tables for users, templates, and attempts.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 339 Tm (- app/schemas.py: Pydantic models that validate behaviour data.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 324 Tm (- app/auth.py: Password hashing and JWT creation.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 309 Tm (- app/behaviour.py: Scoring logic for typing similarity.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 294 Tm (- app/utils.py: Helper math utilities.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 279 Tm (- app/static/behaviour.js: Frontend capture of typing rhythm.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 264 Tm (- app/templates/*.html: HTML pages for register, login, dashboard.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 245 Tm (4\) Configuration \(app/config.py\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 221 Tm (Settings are loaded from environment variables. The most important values are the) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 206 Tm (database URL, secret key, and behaviour threshold.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 187 Tm (Snippet 2: Settings model \(app/config.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 171 Tm (class Settings\(BaseSettings\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 158 Tm (    app_name: str = "TypeShield Authenticator") Tj ET
+BT /F3 9 Tf 1 0 0 1 60 145 Tm (    secret_key: str = Field\("super-secret-key-change-me", env="SECRET_KEY"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 132 Tm (    database_url: str = Field\(DEFAULT_DB_URL, env="DATABASE_URL"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 119 Tm (    behaviour_threshold: float = Field\(75.0, env="BEHAVIOUR_THRESHOLD"\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 100 Tm (Beginner tip: put these values in a .env file so you do not hard-code secrets in) Tj ET
+BT /F1 9 Tf 1 0 0 1 277 40 Tm (Page 1) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 16 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 3744 >>
+stream
+BT /F1 11 Tf 1 0 0 1 50 792 Tm (code.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 773 Tm (5\) Database Layer \(app/database.py\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 749 Tm (The database engine is created once, and FastAPI uses a session dependency for) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 734 Tm (each request.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 715 Tm (Snippet 3: Engine and session dependency \(app/database.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 699 Tm (engine = create_engine\(settings.database_url, echo=False, pool_pre_ping=True\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 686 Tm () Tj ET
+BT /F3 9 Tf 1 0 0 1 60 673 Tm (def init_db\(\) -> None:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 660 Tm (    SQLModel.metadata.create_all\(engine\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 647 Tm () Tj ET
+BT /F3 9 Tf 1 0 0 1 60 634 Tm (def get_session\(\) -> Iterator[Session]:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 621 Tm (    session = Session\(engine\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 608 Tm (    try:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 595 Tm (        yield session) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 582 Tm (        session.commit\(\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 569 Tm (    except Exception:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 556 Tm (        session.rollback\(\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 543 Tm (        raise) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 530 Tm (    finally:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 517 Tm (        session.close\(\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 498 Tm (FastAPI injects the session into route handlers with Depends\(get_session\).) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 479 Tm (6\) Data Models \(app/models.py\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 455 Tm (SQLModel classes become database tables. Each user has one behaviour template,) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 440 Tm (and every login attempt is stored.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 421 Tm (Snippet 4: User and BehaviourTemplate \(app/models.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 405 Tm (class User\(SQLModel, table=True\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 392 Tm (    id: Optional[int] = Field\(default=None, primary_key=True\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 379 Tm (    username: str = Field\(index=True, unique=True\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 366 Tm (    hashed_password: str) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 353 Tm () Tj ET
+BT /F3 9 Tf 1 0 0 1 60 340 Tm (class BehaviourTemplate\(SQLModel, table=True\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 327 Tm (    user_id: int = Field\(foreign_key="user.id"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 314 Tm (    dwell_times: List[float] = Field\(default_factory=list, sa_column=Column\(JSON\)\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 301 Tm (    flight_times: List[float] = Field\(default_factory=list, sa_column=Column\(JSON\)\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 288 Tm (    total_time: float) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 275 Tm (    error_count: int = Field\(default=0\)) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 256 Tm (7\) Request Validation \(app/schemas.py\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 232 Tm (Pydantic ensures the timing values are valid and non-negative.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 213 Tm (Snippet 5: BehaviourData validation \(app/schemas.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 197 Tm (class BehaviourData\(BaseModel\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 184 Tm (    dwell_times: List[float] = Field\(default_factory=list\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 171 Tm (    flight_times: List[float] = Field\(default_factory=list\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 158 Tm (    total_time: float) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 145 Tm (    error_count: int = 0) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 132 Tm (    device_type: str = "fine") Tj ET
+BT /F3 9 Tf 1 0 0 1 60 119 Tm () Tj ET
+BT /F3 9 Tf 1 0 0 1 60 106 Tm (    @validator\("total_time"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 93 Tm (    def validate_total_time\(cls, v: float\) -> float:) Tj ET
+BT /F1 9 Tf 1 0 0 1 277 40 Tm (Page 2) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 16 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 4159 >>
+stream
+BT /F3 9 Tf 1 0 0 1 60 792 Tm (        if v < 0:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 779 Tm (            raise ValueError\("total_time must be non-negative"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 766 Tm (        return v) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 747 Tm (8\) Password Hashing \(app/auth.py\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 723 Tm (Passwords are never stored in plain text. They are hashed with PBKDF2-SHA256.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 704 Tm (Snippet 6: Password hashing helpers \(app/auth.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 688 Tm (pwd_context = CryptContext\(schemes=["pbkdf2_sha256"], deprecated="auto"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 675 Tm () Tj ET
+BT /F3 9 Tf 1 0 0 1 60 662 Tm (def hash_password\(password: str\) -> str:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 649 Tm (    return pwd_context.hash\(password\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 636 Tm () Tj ET
+BT /F3 9 Tf 1 0 0 1 60 623 Tm (def verify_password\(plain_password: str, hashed_password: str\) -> bool:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 610 Tm (    return pwd_context.verify\(plain_password, hashed_password\)) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 591 Tm (9\) Behaviour Scoring \(app/behaviour.py\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 567 Tm (The scoring function compares the stored template with the new attempt. It) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 552 Tm (returns a score from 0 to 100 and checks a threshold.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 533 Tm (Snippet 7: Similarity score \(app/behaviour.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 517 Tm (def similarity_score\(stored: BehaviourTemplate, attempt: BehaviourData\) -> tuple[float, dict]:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 504 Tm (    dwell_component = dwell_score\(stored, attempt\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 491 Tm (    flight_component = flight_score\(stored, attempt\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 478 Tm (    total_component = total_time_score\(stored, attempt\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 465 Tm (    speed_component = speed_score\(stored, attempt\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 452 Tm (    error_component = error_score\(stored, attempt\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 439 Tm (    length_component = length_score\(stored, attempt\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 426 Tm (    combined = \() Tj ET
+BT /F3 9 Tf 1 0 0 1 60 413 Tm (        weights["dwell"] * dwell_component) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 400 Tm (        + weights["flight"] * flight_component) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 387 Tm (        + weights["total"] * total_component) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 374 Tm (        + weights["speed"] * speed_component) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 361 Tm (        + weights["length"] * length_component) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 348 Tm (        + weights["error"] * error_component) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 335 Tm (    \)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 322 Tm (    score = round\(clamp\(combined\), 2\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 309 Tm (    return score, components) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 290 Tm (The is_behaviour_match function adds strong guards \(key count and tempo\) before) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 275 Tm (accepting a score.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 256 Tm (10\) Utility Math \(app/utils.py\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 232 Tm (Two helpers handle clamping and average percentage difference between vectors.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 213 Tm (Snippet 8: Clamp and average difference \(app/utils.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 197 Tm (def clamp\(value: float, minimum: float = 0.0, maximum: float = 100.0\) -> float:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 184 Tm (    return max\(minimum, min\(maximum, value\)\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 171 Tm () Tj ET
+BT /F3 9 Tf 1 0 0 1 60 158 Tm (def average_percentage_difference\(reference: List[float], sample: List[float]\) -> float:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 145 Tm (    if not reference or not sample:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 132 Tm (        return 100.0) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 119 Tm (    diffs = []) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 106 Tm (    for ref_val, sample_val in zip\(reference[:min_len], sample[:min_len]\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 93 Tm (        denominator = ref_val if ref_val != 0 else 1e-6) Tj ET
+BT /F1 9 Tf 1 0 0 1 277 40 Tm (Page 3) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 16 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 4164 >>
+stream
+BT /F3 9 Tf 1 0 0 1 60 792 Tm (        diffs.append\(abs\(ref_val - sample_val\) / denominator * 100\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 779 Tm (    return sum\(diffs\) / max_len if max_len else 100.0) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 760 Tm (11\) FastAPI Routes \(app/main.py\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 736 Tm (The main file wires everything together: app startup, register, login, dashboard,) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 721 Tm (and logout.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 702 Tm (Snippet 9: App setup \(app/main.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 686 Tm (app = FastAPI\(title=settings.app_name\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 673 Tm (app.add_middleware\(SessionMiddleware, secret_key=settings.secret_key\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 660 Tm () Tj ET
+BT /F3 9 Tf 1 0 0 1 60 647 Tm (@app.on_event\("startup"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 634 Tm (def on_startup\(\) -> None:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 621 Tm (    init_db\(\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 602 Tm (On startup, init_db creates tables if they do not exist.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 583 Tm (Snippet 10: Register flow \(app/main.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 567 Tm (@app.post\("/register"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 554 Tm (def register\(...\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 541 Tm (    statement = select\(User\).where\(User.username == username\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 528 Tm (    if session.exec\(statement\).first\(\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 515 Tm (        return error) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 502 Tm (    behaviour_parsed = BehaviourData.parse_raw\(behaviour_data\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 489 Tm (    user = User\(username=username, hashed_password=hash_password\(password\)\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 476 Tm (    session.add\(user\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 463 Tm (    session.flush\(\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 450 Tm (    template = BehaviourTemplate\(user_id=user.id, ...\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 437 Tm (    session.add\(template\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 424 Tm (    session.commit\(\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 411 Tm (    request.session["user_id"] = user.id) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 398 Tm (    return RedirectResponse\(url="/dashboard", status_code=302\)) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 379 Tm (Snippet 11: Login flow \(app/main.py\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 363 Tm (@app.post\("/login"\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 350 Tm (def login\(...\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 337 Tm (    user = session.exec\(select\(User\).where\(User.username == username\)\).first\(\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 324 Tm (    if not user or not verify_password\(password, user.hashed_password\):) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 311 Tm (        return invalid credentials) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 298 Tm (    stored_template = session.exec\(select\(BehaviourTemplate\).where\(...\)\).first\(\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 285 Tm (    behaviour_parsed = BehaviourData.parse_raw\(behaviour_data\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 272 Tm (    is_match, score, reasons = behaviour.is_behaviour_match\(stored_template, behaviour_parsed\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 259 Tm (    if not is_match:) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 246 Tm (        return behaviour mismatch) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 233 Tm (    request.session["user_id"] = user.id) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 220 Tm (    request.session["score"] = score) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 207 Tm (    return RedirectResponse\(url="/dashboard", status_code=302\)) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 188 Tm (12\) Frontend Capture \(app/static/behaviour.js\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 164 Tm (The browser script captures dwell time \(keydown to keyup\) and flight time \(gap) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 149 Tm (between keys\). It also tracks errors \(backspace\).) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 130 Tm (Snippet 12: Keydown capture \(app/static/behaviour.js\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 114 Tm (passwordInput.addEventListener\("keydown", \(event\) => {) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 101 Tm (    if \(event.key === "Backspace"\) {) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 88 Tm (        errorCount += 1;) Tj ET
+BT /F1 9 Tf 1 0 0 1 277 40 Tm (Page 4) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 16 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 3695 >>
+stream
+BT /F3 9 Tf 1 0 0 1 60 792 Tm (        dwellTimes.pop\(\);) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 779 Tm (        flightTimes.pop\(\);) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 766 Tm (        return;) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 753 Tm (    }) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 740 Tm (    if \(startTime === null\) startTime = now;) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 727 Tm (    if \(lastKeyUp !== null\) flightTimes.push\(now - lastKeyUp\);) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 714 Tm (    pendingDown = now;) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 701 Tm (}\);) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 682 Tm (13\) Templates \(HTML\)) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 658 Tm (Jinja2 templates render the forms and dashboard. They also include the) Tj ET
+BT /F1 11 Tf 1 0 0 1 50 643 Tm (behaviour.js script on register and login pages.) Tj ET
+BT /F2 12 Tf 1 0 0 1 50 624 Tm (Snippet 13: Login form captures behaviour \(app/templates/login.html\)) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 608 Tm (<form method="post" action="/login">) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 595 Tm (    <input type="text" name="username" required>) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 582 Tm (    <input type="password" id="password" name="password" required>) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 569 Tm (    <input type="hidden" id="behaviour_data" name="behaviour_data">) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 556 Tm (</form>) Tj ET
+BT /F3 9 Tf 1 0 0 1 60 543 Tm (<script src="/static/behaviour.js"></script>) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 524 Tm (14\) Step-by-Step Data Flow) Tj ET
+BT /F2 13 Tf 1 0 0 1 50 500 Tm (Register) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 481 Tm (- User types password; behaviour.js records timing vectors.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 466 Tm (- Form submits username, password, and behaviour JSON.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 451 Tm (- Backend hashes password and stores BehaviourTemplate.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 436 Tm (- Session is created and user is redirected to /dashboard.) Tj ET
+BT /F2 13 Tf 1 0 0 1 50 417 Tm (Login) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 398 Tm (- Password is checked with verify_password.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 383 Tm (- Stored template is loaded from database.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 368 Tm (- Behaviour score is computed; must be above threshold.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 353 Tm (- On success, session and score are stored for dashboard.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 334 Tm (15\) Common Beginner Questions) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 310 Tm (- Why store timing vectors? They capture how you type, not just what you type.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 295 Tm (- Why JSON columns? Timing arrays fit naturally as JSON lists.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 280 Tm (- What is behaviour_threshold? The minimum score required to accept a login.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 265 Tm (- What happens on touch devices? The script switches to coarse capture.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 246 Tm (16\) Where To Explore Next) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 222 Tm (- Try changing BEHAVIOUR_THRESHOLD to see stricter or softer matching.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 207 Tm (- Add more charts or logs to the dashboard.) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 192 Tm (- Store multiple templates per user for more robust matching.) Tj ET
+BT /F2 16 Tf 1 0 0 1 50 173 Tm (Code Snippets Index) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 149 Tm (- Snippet 1: Local setup commands \(requirements.txt\) - page 1) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 134 Tm (- Snippet 2: Settings model \(app/config.py\) - page 1) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 119 Tm (- Snippet 3: Engine and session dependency \(app/database.py\) - page 2) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 104 Tm (- Snippet 4: User and BehaviourTemplate \(app/models.py\) - page 2) Tj ET
+BT /F1 9 Tf 1 0 0 1 277 40 Tm (Page 5) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 16 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 952 >>
+stream
+BT /F1 11 Tf 1 0 0 1 58 792 Tm (- Snippet 5: BehaviourData validation \(app/schemas.py\) - page 2) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 777 Tm (- Snippet 6: Password hashing helpers \(app/auth.py\) - page 3) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 762 Tm (- Snippet 7: Similarity score \(app/behaviour.py\) - page 3) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 747 Tm (- Snippet 8: Clamp and average difference \(app/utils.py\) - page 3) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 732 Tm (- Snippet 9: App setup \(app/main.py\) - page 4) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 717 Tm (- Snippet 10: Register flow \(app/main.py\) - page 4) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 702 Tm (- Snippet 11: Login flow \(app/main.py\) - page 4) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 687 Tm (- Snippet 12: Keydown capture \(app/static/behaviour.js\) - page 4) Tj ET
+BT /F1 11 Tf 1 0 0 1 58 672 Tm (- Snippet 13: Login form captures behaviour \(app/templates/login.html\) - page 5) Tj ET
+BT /F1 9 Tf 1 0 0 1 277 40 Tm (Page 6) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 16 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R] /Count 6 >>
+endobj
+17 0 obj
+<< /Type /Catalog /Pages 16 0 R >>
+endobj
+xref
+0 18
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000154 00000 n 
+0000000222 00000 n 
+0000004205 00000 n 
+0000004352 00000 n 
+0000008148 00000 n 
+0000008295 00000 n 
+0000012506 00000 n 
+0000012653 00000 n 
+0000016870 00000 n 
+0000017019 00000 n 
+0000020767 00000 n 
+0000020916 00000 n 
+0000021920 00000 n 
+0000022069 00000 n 
+0000022160 00000 n 
+trailer
+<< /Size 18 /Root 17 0 R >>
+startxref
+22211
+%%EOF
